@@ -85,10 +85,12 @@ function createTop10AnalysisPrompt_(boxofficeData) {
 
 ## 🏆 TOP 10, 관객의 선택을 받은 영화들
 ### **[순위]. [영화 제목]**
-    * **성적표:** 지난주 [주간 관객수, 만명 단위] 명, 누적 [누적 관객수, 만명 단위] 명
-    * **기자의 시선:** [영화의 핵심 매력, 관람 포인트, 아쉬운 점 등을 솔직하고 깊이 있게 분석. 실제 관객 반응(SNS, 커뮤니티 등)을 인용하여 생동감을 더하고, 전문적인 식견을 바탕으로 흥행 요인을 설명]
+    * **📅개봉일:** [개봉일 ('2025년 8월 6일' 포맷)]  **📈관객수:** 지난주 [주간 관객수, 만명 단위] 명, 누적 [누적 관객수, 만명 단위] 명
+    * **🎥감독:** [감독의 이름] **👥출연진:** [출연 배우들의 이름]
+    * **총평:** [영화의 핵심 매력, 관람 포인트, 아쉬운 점 등을 솔직하고 깊이 있게 분석. 실제 관객 반응(SNS, 커뮤니티 등)을 인용하여 생동감을 더하고, 전문적인 식견을 바탕으로 흥행 요인을 설명]
     * **TMI:** [독자들이 흥미를 느낄 만한 비하인드 스토리, 캐스팅 비화, 배우/감독 관련 재미있는 트리비아]
 
+---
 ## 🎟️ 이번 주, 당신의 티켓은?
 
 ---
@@ -121,7 +123,9 @@ function createTrendAndUpcomingPrompt_(upcomingMovies) {
 **[콘텐츠 구성 및 마크다운 형식]**
 ## 🎟️ 이번 주, 당신의 티켓은? (개봉 예정작)
 
-### **[개봉일 ('8월 6일 (수)' 포맷)] [영화 제목] - [기대감을 한껏 끌어올리는 짧은 태그라인]**
+### **[영화 제목]** - [기대감을 한껏 끌어올리는 짧은 태그라인]
+    * **📅개봉일:** [개봉일 ('2025년 8월 6일' 포맷)]
+    * **🎥감독:** [감독의 이름] **👥출연진:** [출연 배우들의 이름]
     * **체크 포인트:** [이 영화를 '반드시 극장에서 봐야 하는' 혹은 '이런 점은 고려해야 하는' 이유를 명확하게 제시. (예: '믿고 보는 OOO 감독의 신작', '호불호가 갈릴 수 있는 파격적 소재')]
     * **이런 분께 추천해요!:** [타겟 관객층을 구체적으로 명시하여 독자의 영화 선택을 도움]
 
@@ -138,7 +142,6 @@ ${JSON.stringify({ upcoming: upcomingMovies }, null, 2)}
 `;
   return prompt;
 }
-
 /**
  * 박스오피스 데이터 가져오기 (최신 10개)
  */
@@ -146,11 +149,11 @@ function getBoxofficeData_(sheet) {
   const data = sheet.getDataRange().getValues();
   const headers = data[0];
   const totalRows = data.length;
-  
+
   // 가장 아래쪽 10개 데이터 가져오기 (최신 데이터)
   const startRow = Math.max(1, totalRows - 10); // 헤더 제외하고 마지막 10개
   const movies = [];
-  
+
   // 필요한 컬럼 인덱스 찾기
   const columnIndexes = {
     movieNm: headers.indexOf('movieNm'),
@@ -163,33 +166,115 @@ function getBoxofficeData_(sheet) {
     actors: headers.indexOf('actors'),
     showTm: headers.indexOf('showTm')
   };
-  
+
   // 인덱스 유효성 검사
   for (let key in columnIndexes) {
     if (columnIndexes[key] === -1) {
       console.error(`컬럼 '${key}'를 찾을 수 없습니다.`);
     }
   }
-  
+
   // 최신 10개 데이터 추출
   for (let i = startRow; i < totalRows; i++) {
     const movie = {
       movieNm: data[i][columnIndexes.movieNm] || '',
       movieNmEn: data[i][columnIndexes.movieNmEn] || '',
       rank: data[i][columnIndexes.rank] || '',
-      openDt: data[i][columnIndexes.openDt] || '',
+      openDt: '', // 초기화
       audiCnt: data[i][columnIndexes.audiCnt] || '',
       audiAcc: data[i][columnIndexes.audiAcc] || '',
       directors: data[i][columnIndexes.directors] || '',
       actors: data[i][columnIndexes.actors] || '',
       showTm: data[i][columnIndexes.showTm] || ''
     };
+    
+    // openDt를 "yyyy-mm-dd" 포맷으로 변환
+    if (columnIndexes.openDt !== -1 && data[i][columnIndexes.openDt]) {
+      const openDate = new Date(data[i][columnIndexes.openDt]);
+      if (!isNaN(openDate.getTime())) { // 유효한 날짜인지 확인
+        const year = openDate.getFullYear();
+        const month = String(openDate.getMonth() + 1).padStart(2, '0');
+        const day = String(openDate.getDate()).padStart(2, '0');
+        movie.openDt = `${year}-${month}-${day}`;
+      } else {
+        console.error(`날짜 데이터 변환 오류: ${data[i][columnIndexes.openDt]}`);
+      }
+    }
+
     movies.push(movie);
   }
-  
+
   // 랭크 순으로 정렬 (1위부터 10위까지)
   movies.sort((a, b) => parseInt(a.rank) - parseInt(b.rank));
-  
+
+  return movies;
+}
+
+/**
+ * 박스오피스 데이터 가져오기 (최신 10개)
+ */
+function getBoxofficeData_(sheet) {
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const totalRows = data.length;
+
+  // 가장 아래쪽 10개 데이터 가져오기 (최신 데이터)
+  const startRow = Math.max(1, totalRows - 10); // 헤더 제외하고 마지막 10개
+  const movies = [];
+
+  // 필요한 컬럼 인덱스 찾기
+  const columnIndexes = {
+    movieNm: headers.indexOf('movieNm'),
+    movieNmEn: headers.indexOf('movieNmEn'),
+    rank: headers.indexOf('rank'),
+    openDt: headers.indexOf('openDt'),
+    audiCnt: headers.indexOf('audiCnt'),
+    audiAcc: headers.indexOf('audiAcc'),
+    directors: headers.indexOf('directors'),
+    actors: headers.indexOf('actors'),
+    showTm: headers.indexOf('showTm')
+  };
+
+  // 인덱스 유효성 검사
+  for (let key in columnIndexes) {
+    if (columnIndexes[key] === -1) {
+      console.error(`컬럼 '${key}'를 찾을 수 없습니다.`);
+    }
+  }
+
+  // 최신 10개 데이터 추출
+  for (let i = startRow; i < totalRows; i++) {
+    const movie = {
+      movieNm: data[i][columnIndexes.movieNm] || '',
+      movieNmEn: data[i][columnIndexes.movieNmEn] || '',
+      rank: data[i][columnIndexes.rank] || '',
+      openDt: '', // 초기화
+      audiCnt: data[i][columnIndexes.audiCnt] || '',
+      audiAcc: data[i][columnIndexes.audiAcc] || '',
+      directors: data[i][columnIndexes.directors] || '',
+      actors: data[i][columnIndexes.actors] || '',
+      showTm: data[i][columnIndexes.showTm] || ''
+    };
+    
+    // openDt를 "yyyy-mm-dd" 포맷으로 변환
+    if (columnIndexes.openDt !== -1 && data[i][columnIndexes.openDt]) {
+      const openDate = new Date(data[i][columnIndexes.openDt]);
+      if (!isNaN(openDate.getTime())) { // 유효한 날짜인지 확인
+        const year = openDate.getFullYear();
+        const month = String(openDate.getMonth() + 1).padStart(2, '0');
+        const day = String(openDate.getDate()).padStart(2, '0');
+        movie.openDt = `${year}-${month}-${day}`;
+      } else {
+        console.error(`날짜 데이터 변환 오류: ${data[i][columnIndexes.openDt]}`);
+      }
+    }
+
+    movies.push(movie);
+  }
+
+  // 랭크 순으로 정렬 (1위부터 10위까지)
+  movies.sort((a, b) => parseInt(a.rank) - parseInt(b.rank));
+
   return movies;
 }
 
