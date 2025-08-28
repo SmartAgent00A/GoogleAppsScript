@@ -358,8 +358,8 @@ function enrichMoviesWithDetails_(upcomingMovies) {
       movie.movieCd,
       movie.movieNm,
       movie.openDt.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
-      nationAlt,       // 수정된 변수 사용
-      genreAlt,        // 수정된 변수 사용
+      movie.nationAlt,
+      movie.genreAlt,
       directorNames,   // 수정된 변수 사용
       movie.movieNmEn,
       showTm,
@@ -407,4 +407,5 @@ function clearAndSaveToSheet_(data) {
 
   Logger.log(`'${SHEET_MOVIELIST}' 시트를 초기화하고 ${data.length}개의 개봉 예정 영화 데이터를 저장했습니다.`);
   // SpreadsheetApp.getUi().alert(`'${SHEET_MOVIELIST}' 시트를 초기화하고 ${data.length}개의 개봉 예정 영화를 저장했습니다.`);
+
 }
