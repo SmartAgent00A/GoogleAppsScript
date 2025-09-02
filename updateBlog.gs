@@ -259,7 +259,8 @@ function convertMarkdownToHtml_(markdown) {
   html = html.replace(/^#### (.*$)/gim, '<h4>$1</h4>');
   html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
   html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+  // html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+  html = html.replace(/^# (.*$)/gim, '<h1 style="white-space: normal; word-break: keep-all; overflow-wrap: break-word; line-height: 1.2;">$1</h1>');
 
   // ** 굵게 변환
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
@@ -274,6 +275,10 @@ function convertMarkdownToHtml_(markdown) {
   // 연속되는 <li> 태그들을 하나의 <ul> 블록으로 묶기
   // 마지막 항목까지 포함하도록 정규식을 더 유연하게 수정
   html = html.replace(/((?:<li>.*<\/li>(?:\s*\n?)*)+)/g, '<ul>$1</ul>');
+
+  // 연속되는 <li> 태그들을 하나의 <ul> 블록으로 묶고, 줄 간격 스타일 추가
+  // li 항목간의 거리를 지금의 1.2배정도로 늘리기 위해 line-height를 1.2로 지정
+  // html = html.replace(/((?:<li>.*<\/li>(?:\s*\n?)*)+)/g, '<ul style="line-height: 1.5;">$1</ul>');
   
   // 문단을 <p> 태그로 변환
   html = html.split(/\n\s*\n/).map(paragraph => {
