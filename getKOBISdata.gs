@@ -45,16 +45,16 @@ const SHEET_MOVIELIST = "MovieList";
  */
 function getKOBISdata(){
 
-  fetchAndSaveWeeklyBoxOffice();
+  fetchAndSaveWeeklyBoxOffice_();
 
-  fetchAndSaveUpcomingMovies();
+  fetchAndSaveUpcomingMovie_();
 }
 
 /**
  * 주간 박스오피스 데이터를 가져옵니다.
  * 
  */
-function fetchAndSaveWeeklyBoxOffice() {
+function fetchAndSaveWeeklyBoxOffice_() {
   if (API_KEY === "YOUR_KOBIS_API_KEY" || API_KEY.trim() === "") {
     // SpreadsheetApp.getUi().alert("API 키가 설정되지 않았습니다. 스크립트 상단의 API_KEY 변수에 발급받은 키를 입력해주세요.");
     return;
@@ -227,7 +227,7 @@ function getTargetDate_() {
  * 3. 상위 15개 영화의 상세 정보를 추가로 조회합니다.
  * 4. 'MovieList' 시트를 비우고 새로운 목록을 저장합니다.
  */
-function fetchAndSaveUpcomingMovies() {
+function fetchAndSaveUpcomingMovie_() {
   if (API_KEY === "YOUR_KOBIS_API_KEY" || API_KEY.trim() === "") {
     // SpreadsheetApp.getUi().alert("API 키가 설정되지 않았습니다. 스크립트 상단의 API_KEY 변수에 발급받은 키를 입력해주세요.");
     return;
@@ -358,8 +358,8 @@ function enrichMoviesWithDetails_(upcomingMovies) {
       movie.movieCd,
       movie.movieNm,
       movie.openDt.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
-      movie.nationAlt,
-      movie.genreAlt,
+      movie.nationAlt,       // 수정된 변수 사용
+      movie.genreAlt,        // 수정된 변수 사용
       directorNames,   // 수정된 변수 사용
       movie.movieNmEn,
       showTm,
@@ -407,5 +407,4 @@ function clearAndSaveToSheet_(data) {
 
   Logger.log(`'${SHEET_MOVIELIST}' 시트를 초기화하고 ${data.length}개의 개봉 예정 영화 데이터를 저장했습니다.`);
   // SpreadsheetApp.getUi().alert(`'${SHEET_MOVIELIST}' 시트를 초기화하고 ${data.length}개의 개봉 예정 영화를 저장했습니다.`);
-
 }
